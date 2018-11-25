@@ -23,13 +23,15 @@ momentum = 0.3
 learningrate = 0.0001
 epochs = 240
 
+
 def convertToDataSet(X, Y):
     ds = SupervisedDataSet(n_in, n_out)
     for i in range(len(X)):
-        tempArr = [0,0,0]
+        tempArr = [0, 0, 0]
         tempArr[int(Y[i])] = 1
         ds.addSample(X[i], tempArr)
     return ds
+
 
 def getClasses(output):
     arrClasses = []
@@ -40,11 +42,12 @@ def getClasses(output):
         # TODO: in other use cases, might want to say "unknown"
     return arrClasses
 
+
 def plotPrecVsEpoch(trainDS, testDS, figTitle):
     net = buildNetwork(n_in, n_hidden0, n_out)
-    print net['in']
-    print net['hidden0']
-    print net['out']
+    print(net['in'])
+    print(net['hidden0'])
+    print(net['out'])
 
     trainer = BackpropTrainer(net, trainDS, momentum=momentum, learningrate=learningrate, verbose=True)
 
@@ -63,7 +66,7 @@ def plotPrecVsEpoch(trainDS, testDS, figTitle):
         out = net.activateOnDataset(testDS)
         np_out = getClasses(out)
         test_out = getClasses(testDS['target'])
-        test_prec.append( metrics.precision_score(np_out, test_out, average='macro') )
+        test_prec.append(metrics.precision_score(np_out, test_out, average='macro') )
     
     # TODO: print full-blown metrics here?
     #print 'train_prec'
@@ -71,11 +74,11 @@ def plotPrecVsEpoch(trainDS, testDS, figTitle):
     #print 'test_prec'
     #print test_prec
     
-    print n_hidden0, ", ", learningrate, ", ", max(train_prec),", ", train_prec[-1], ", ", max(test_prec), ", ", test_prec[-1]
+    print(n_hidden0, ", ", learningrate, ", ", max(train_prec), ", ", train_prec[-1], ", ", max(test_prec), ", ", test_prec[-1])
 
     pl.ioff()
-    pl.plot(train_prec,color='blue', label='Precision on training set')
-    pl.plot(test_prec,color='red', label='Precision on testing set')
+    pl.plot(train_prec, color='blue', label='Precision on training set')
+    pl.plot(test_prec, color='red', label='Precision on testing set')
     pl.legend(loc=4)
     pl.savefig(figTitle, bbox_inches='tight')
     pl.clf()
@@ -98,7 +101,8 @@ def run(trainDS, testDS, m):
     precision = metrics.precision_score(np_out, testDS['target'])
 
     return net, precision
-    
+
+
 def runCV(trainX, trainY, m):
     scores = []
     for train_index, test_index in cv:
@@ -107,35 +111,40 @@ def runCV(trainX, trainY, m):
         temp_net, temp_score = run(trainDS_train, trainDS_val, m)
         scores.append(temp_score)
     avg = np.average(scores)
-    print 'For m = ' + str(m) + ' avg precision was: ' + str(avg)
+    print('For m = ' + str(m) + ' avg precision was: ' + str(avg))
     return avg
+
+
+def runExploratoryRuns():
+    dataset = np.loadtxt(datafile, delimiter=',')
+
+    print("Dataset shape: ", dataset.shape)
+
+    X = dataset[:, 1:16]
+    Y = dataset[:, 0]
+    trainX, testX, trainY, testY = train_test_split(X, Y, train_size=0.65, test_size=0.35, random_state=42)
+
+    trainDS = convertToDataSet(trainX, trainY)
+    testDS = convertToDataSet(testX, testY)
+
+    # TODO: Are these the right arguments for a stratified kFold?
+    # cv = StratifiedKFold(trainY, 5)
+
+    mRange = [0, 0.2, 0.4, 0.6, 0.8]
+    hiddenRange = [5, 10, 15, 20, 25, 30]
+    learningRange = [0.00001, 0.0001, 0.001, 0.01, 0.1]
+
+    learningrate = 0.00001
+    n_hidden0 = 25
+    epochs = 100
+    plotPrecVsEpoch(trainDS, testDS, "figures/Test title.png")
+
 
 start = time.clock()
 
-dataset = np.loadtxt(datafile, delimiter=',')
 
-print "Dataset shape: ", dataset.shape
-
-X = dataset[:, 1:16]
-Y = dataset[:, 0]
-trainX, testX, trainY, testY = train_test_split(X, Y, train_size=0.65, test_size=0.35, random_state=42)
-
-trainDS = convertToDataSet(trainX, trainY)
-testDS = convertToDataSet(testX, testY)
-
-# TODO: Are these the right arguments for a stratified kFold?
-#cv = StratifiedKFold(trainY, 5)
-
-mRange = [0, 0.2, 0.4, 0.6, 0.8]
-hiddenRange = [5, 10, 15, 20, 25, 30]
-learningRange = [0.00001, 0.0001, 0.001, 0.01, 0.1]
-
-learningrate = 0.00001
-n_hidden0 = 25
-epochs = 100
-plotPrecVsEpoch(trainDS, testDS, "figures/Test title.png")
 
 end = time.clock()
 
-print "Time elapsed: " 
+print("Time elapsed: ")
 print (end - start)
