@@ -24,8 +24,8 @@ class SampleListener(Leap.Listener):
     f = open("data.csv",'w')
 
     def on_connect(self, controller):
-        print "Connected"
-        controller.enable_gesture(Leap.Gesture.TYPE_SWIPE);
+        print("Connected")
+        controller.enable_gesture(Leap.Gesture.TYPE_SWIPE)
 
 
     def on_frame(self, controller):
@@ -38,7 +38,7 @@ class SampleListener(Leap.Listener):
             if self.stage == " ":
                 winsound.Beep(300, 200)
                 self.stage = signs[random.randint(0, len(signs)-1)]
-            print self.stage, " ", tm, " ", self.sign
+            print(self.stage, " ", tm, " ", self.sign)
         else:
             if not self.stage == "":
                 if len(frame.hands) == 1:
@@ -55,9 +55,9 @@ class SampleListener(Leap.Listener):
                     pinky = hand.fingers.finger_type(Finger.TYPE_PINKY)[0]
                     line = line + ", " + str(pinky.direction.x) + ", " + str(pinky.direction.y) + ", " + str(pinky.direction.z) + "\n"
                     self.f.write(line)
-                    print line
+                    print(line)
                 self.stage = ""
-            print "BLANK!", " ", tm, " ", self.blank
+            print("BLANK!", " ", tm, " ", self.blank)
             if self.blank < tm:
                 self.blank = tm + 2*period_length
                 self.sign = tm + period_length
@@ -72,7 +72,7 @@ def main():
     controller.add_listener(listener)
 
     # Keep this process running until Enter is pressed
-    print "Press Enter to quit..."
+    print("Press Enter to quit...")
     try:
         sys.stdin.readline()
     except KeyboardInterrupt:
@@ -81,6 +81,7 @@ def main():
         # Remove the sample listener when done
         listener.f.close()
         controller.remove_listener(listener)
+
 
 if __name__ == "__main__":
     main()
